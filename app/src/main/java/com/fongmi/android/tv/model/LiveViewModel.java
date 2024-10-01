@@ -98,7 +98,13 @@ public class LiveViewModel extends ViewModel {
 
     private void setTimeZone(String url) {
         try {
-            if (!url.contains("serverTimeZone=")) return;
+            if (!url.contains("serverTimeZone=")) {
+                if (!url.contains(".112114.")) {
+                    return;
+                } else {
+                    url = url + "&serverTimeZone=Asia/Hong_Kong";
+                }
+            }
             TimeZone timeZone = TimeZone.getTimeZone(Uri.parse(url).getQueryParameter("serverTimeZone"));
             formatDate.setTimeZone(timeZone);
             formatTime.setTimeZone(timeZone);
