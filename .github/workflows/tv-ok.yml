@@ -39,14 +39,6 @@ jobs:
           distribution: temurin
           java-version: 18
 
-
-      - name: Checkout Publish sources
-        uses: actions/checkout@v4
-        with:
-          repository: midsummer0206/oktv20241116
-          ref: publish
-          path: code
-
       - name: Edit gradle
         run: |
           cd code 
