@@ -29,7 +29,7 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
         with:
-          repository: jadehh/FongMiTV
+          repository: midsummer0206/oktv20241116
           ref: release
           path: tv
 
@@ -43,7 +43,7 @@ jobs:
       - name: Checkout Publish sources
         uses: actions/checkout@v4
         with:
-          repository: jadehh/FongMiTV
+          repository: midsummer0206/oktv20241116
           ref: publish
           path: code
 
@@ -53,6 +53,19 @@ jobs:
           python build.py --version ${{ github.ref_name }}
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Release Apk Sign
+        run: |
+          signingConfigs='ICAgIHNpZ25pbmdDb25maWdzIHtcCiAgICAgICAgaWYgKHByb2plY3QuaGFzUHJvcGVydHkoIlJFTEVBU0VfU1RPUkVfRklMRSIpKSB7XAogICAgICAgICAgICBteUNvbmZpZyB7XAogICAgICAgICAgICAgICAgc3RvcmVGaWxlIGZpbGUoUkVMRUFTRV9TVE9SRV9GSUxFKVwKICAgICAgICAgICAgICAgIHN0b3JlUGFzc3dvcmQgUkVMRUFTRV9TVE9SRV9QQVNTV09SRFwKICAgICAgICAgICAgICAgIGtleUFsaWFzIFJFTEVBU0VfS0VZX0FMSUFTXAogICAgICAgICAgICAgICAga2V5UGFzc3dvcmQgUkVMRUFTRV9LRVlfUEFTU1dPUkRcCiAgICAgICAgICAgICAgICB2MVNpZ25pbmdFbmFibGVkIHRydWVcCiAgICAgICAgICAgICAgICB2MlNpZ25pbmdFbmFibGVkIHRydWVcCiAgICAgICAgICAgICAgICBlbmFibGVWM1NpZ25pbmcgPSB0cnVlXAogICAgICAgICAgICAgICAgZW5hYmxlVjRTaWduaW5nID0gdHJ1ZVwKICAgICAgICAgICAgfVwKICAgICAgICB9XAogICAgfVwKXA=='
+          signingConfig='ICAgICAgICAgICAgaWYgKHByb2plY3QuaGFzUHJvcGVydHkoIlJFTEVBU0VfU1RPUkVfRklMRSIpKSB7XAogICAgICAgICAgICAgICAgc2lnbmluZ0NvbmZpZyBzaWduaW5nQ29uZmlncy5teUNvbmZpZ1wKICAgICAgICAgICAgfVwK'
+          signingConfigs="$(echo "$signingConfigs" |base64 -d )"
+          signingConfig="$(echo "$signingConfig" |base64 -d )"
+          sed -i -e "/defaultConfig {/i\\$signingConfigs " -e "/debug {/a\\$signingConfig " -e "/release {/a\\$signingConfig " app/build.gradle
+          cp -f ${{ github.workspace }}/.github/workflows/TVBoxOSC.jks app/TVBoxOSC.jks
+          sed -i '$a\RELEASE_STORE_FILE=./TVBoxOSC.jks'     ./gradle.properties
+          sed -i '$a\RELEASE_KEY_ALIAS=TVBoxOSC'            ./gradle.properties
+          sed -i '$a\RELEASE_STORE_PASSWORD=TVBoxOSC'       ./gradle.properties
+          sed -i '$a\RELEASE_KEY_PASSWORD=TVBoxOSC'         ./gradle.properties
 
       - name: Build with Gradle
         run: |
@@ -71,19 +84,13 @@ jobs:
           current_time=$(date +%F%t%T)
           echo "current_time is ${current_time}"
           echo ::set-output name=current_time::$current_time        
-      - name: Generate Changelog
+      - name: Prepare App
         run: |
-          cd tv
-          echo "# ${{ github.ref_name }}" > ${{ github.workspace }}-CHANGELOG.txt
-          echo "${{steps.get_current_time.outputs.current_time}}"
-          echo "## ${{steps.get_current_time.outputs.current_time}} ${{ github.ref_name }}" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "### Open Version Update" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "* ${{steps.get_git_latest_message.outputs.git_latest}}" >> ${{ github.workspace }}-CHANGELOG.txt
-      - name: Deploy
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+          mkdir -p ${{ github.workspace }}/apk/
+          find . -name "*.apk" -exec mv {} ${{ github.workspace }}/apk/ \;
+
+      - name: Upload App To Artifact
+        uses: actions/upload-artifact@v4
         with:
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
-          files: ./tv/app/build/outputs/apk/*/release/*.apk
-        env:
-          GITHUB_TOKEN: ${{ github.token }} # 给最高的权限
+          name: com.fongmi.android.tv
+          path: ${{ github.workspace }}/apk/*
