@@ -95,6 +95,10 @@
     public static ** valueOf(java.lang.String);
 }
 
+# bean
+-keep class com.fongmi.android.tv.bean.** { *; }
+
+
 # x5
 -dontwarn dalvik.**
 -dontwarn com.tencent.smtt.**
