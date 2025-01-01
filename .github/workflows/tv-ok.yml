@@ -1,9 +1,7 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - v*
+  
 
 jobs:
   build:
@@ -19,18 +17,14 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        framework: [ "assembleLeanbackJavaArm64_v8aRelease",
-                     "assembleLeanbackJavaArmeabi_v7aRelease",
-                     "assembleMobileJavaArm64_v8aRelease",
-                     "assembleMobileJavaArmeabi_v7aRelease" ]
-#        framework: ["assembleLeanbackJavaArm64_v8aRelease",
-#                    "assembleLeanbackJavaArmeabi_v7aRelease",
-#                    "assembleLeanbackPythonArm64_v8aRelease",
-#                    "assembleLeanbackPythonArmeabi_v7aRelease",
-#                    "assembleMobileJavaArm64_v8aRelease",
-#                    "assembleMobileJavaArmeabi_v7aRelease",
-#                    "assembleMobilePythonArm64_v8aRelease",
-#                    "assembleMobilePythonArmeabi_v7aRelease"]
+        framework: ["assembleLeanbackJavaArm64_v8aRelease",
+                    "assembleLeanbackJavaArmeabi_v7aRelease",
+                    "assembleLeanbackPythonArm64_v8aRelease",
+                    "assembleLeanbackPythonArmeabi_v7aRelease",
+                    "assembleMobileJavaArm64_v8aRelease",
+                    "assembleMobileJavaArmeabi_v7aRelease",
+                    "assembleMobilePythonArm64_v8aRelease",
+                    "assembleMobilePythonArmeabi_v7aRelease"]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
