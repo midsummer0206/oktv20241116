@@ -39,10 +39,6 @@ jobs:
           distribution: temurin
           java-version: 18
 
-      - name: Edit gradle
-        run: |
-          cd code 
-          python build.py --version ${{ github.ref_name }}
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
